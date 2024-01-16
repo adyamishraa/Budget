@@ -7,6 +7,7 @@ import MainStats from './components/MainStats';
 import { useEffect, useState } from 'react';
 import EntryLineLooping from './components/EntryLineLooping';
 import ModalEdit from './components/ModalEdit';
+import { legacy_createStore as createStore, combineReducers } from 'redux';
 
 function App() {
   const [description, setDescription] = useState('');
@@ -46,6 +47,54 @@ function App() {
     setIncomeTotal(totalIncomes);
     setExpenseTotal(totalExpenses);
   }, [entries])
+
+  /// store
+
+  function entriesReducer(state = initialEntries, action) {
+   let newEntries;
+   switch (action.type) {
+    case 'ADD_ENTRY':
+      newEntries = state.concat({...action.payload});
+      return newEntries;
+    case 'REMOVE_ENTRY': 
+      newEntries = state.concat({...action.payload});
+      return newEntries;
+    default: return newEntries;
+   }
+  };
+
+  const combinedReducers = combineReducers ({
+    entries: entriesReducer,
+  });
+
+  const store = createStore(combinedReducers);
+
+  store.subscribe(()=>{
+    console.log('store:', store.getState());
+  })
+
+  // const payloadRemove = {
+  //   id: 1
+  // };
+
+  const payloadAdd = {
+    id: entries.length+1,
+    description: "Hello from Redux",
+    value: 100,
+    isExpense: false
+  };
+
+  function addEntryRedux(payload) {
+    return {type: 'ADD_ENTRY', payload: payloadAdd, };
+  }
+
+  function removeEntryRedux(id) {
+    return {type: 'REMOVE_ENTRY', payload: {id}, };
+  }
+  store.dispatch(addEntryRedux(payloadAdd));
+  store.dispatch(removeEntryRedux(1));
+
+  ///
 
   function deleteEntry(id) {
     const result = entries.filter((entry) => id !== entry.id);
